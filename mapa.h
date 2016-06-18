@@ -1,17 +1,22 @@
 #pragma once
-#include "vehiculo.h"
+// #include "vehiculo.h"
 #include <vector>
 using namespace std;
+class Vehiculo;
 class Mapa{
-	static const int filas = 26, columnas = 46;
+	static const int filas = 21, columnas = 33;
 	char mapaCaracteres[filas][columnas], mapaOriginal[filas][columnas];
-	vector <vehiculo*> vehiculos;
+	vector <Vehiculo*> vehiculos;
+	Vehiculo* vehiculo;
 	public:
 		Mapa();
 		~Mapa();
-		vehiculo* obtenerVehiculo(const char)const;
+		Vehiculo* obtenerVehiculo(const char)const;
 		void modificarCasilla(const int, const int, const char);
 		char obtenerCasilla(const int, const int)const;
 		int* posicionVehiculo(const char)const;
-		void agregarVehiculo(int, int, vehiculo&);
+		void agregarVehiculo(int, int, Vehiculo*);
+		void iniciarMapa();
+		int obtenerFilas();
+		int obtenerColumnas();
 };
