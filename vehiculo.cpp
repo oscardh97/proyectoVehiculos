@@ -1,15 +1,15 @@
 // #include "mapa.h"
 #include "vehiculo.h"
 // Vehiculo::Vehiculo(){}
-Vehiculo::Vehiculo(int posX, int posY, char id):id(id){
-	estado = true;
+Vehiculo::Vehiculo(int posX, int posY, char id, int resistencia, int velocidad):id(id), resistencia(resistencia), velocidad(velocidad){
+	estado = 100;
 	// estaVolando =false;
 	// moverAvion = false;
 	// estado = true;
 	// reiniciarDirecion();
 }
 // Vehiculo::~Vehiculo(){}
-	// virtual void avanzar(){}
+// void Vehiculo::avanzar(){}
 char Vehiculo::obtenerId(){
 	return this->id;
 }

@@ -2,9 +2,9 @@
 #include <vector>
 #include "vehiculo.h"
 #include "mapa.h"
-class Terrestre : public Vehiculo{
+class Acuatico : public Vehiculo{
 public:
-	Terrestre(int, int, char, int, int);
+	Acuatico(int, int, char, int, int);
 	// ~vehiculo();/*/
 	// int Norte, Sur, Este, Oeste, a, b;
 	// bool estaVolando,estado, moverAvion;
