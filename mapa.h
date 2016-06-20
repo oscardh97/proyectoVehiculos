@@ -15,7 +15,7 @@ class Mapa{
 		Vehiculo* obtenerVehiculo(const char)const;
 		void modificarCasilla(const int, const int, const char);
 		char obtenerCasilla(const int, const int)const;
-		// char obtenerCasillaOriginal(const int, const int)const;
+		char obtenerCasillaOriginal(const int, const int)const;
 		int* posicionVehiculo(const char)const;
 		void agregarVehiculo(int, int, Vehiculo*);
 		void iniciarMapa();

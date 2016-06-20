@@ -12,8 +12,8 @@
 #include <atomic>
 using namespace std;
 
-Acuatico::Acuatico(int posX, int posY, char id, int resistencia, int velocidad):Vehiculo(posX, posY, id, resistencia, velocidad){
-}	
+Acuatico::Acuatico(int posX, int posY, char id, int resistencia, int velocidad, int color):Vehiculo(posX, posY, id, resistencia, velocidad, color){
+}
 void Acuatico::avanzar(vector<int*> coordenadas, Mapa* ciudad){
 	for (int i = 0; i < coordenadas.size(); i++) {
 		int* posicion = ciudad->posicionVehiculo(this->obtenerId());
@@ -24,7 +24,7 @@ void Acuatico::avanzar(vector<int*> coordenadas, Mapa* ciudad){
 				newY--;
 				if (!this->puedeSeguir(newX, newY, ciudad))
 					return;
-				std::this_thread::sleep_for(std::chrono::milliseconds((1000 / this->velocidad) + 100 * ciudad->obtenerCorriente()));
+				std::this_thread::sleep_for(std::chrono::milliseconds((1000 * this->velocidad) + 100 * ciudad->obtenerCorriente()));
 			}
 		//SUR
 		} else if (coordenadas[i][0] == 1) {
@@ -32,7 +32,7 @@ void Acuatico::avanzar(vector<int*> coordenadas, Mapa* ciudad){
 				newY++;
 				if (!this->puedeSeguir(newX, newY, ciudad))
 					return;
-				std::this_thread::sleep_for(std::chrono::milliseconds((1000 / this->velocidad) + 100 * ciudad->obtenerCorriente()));
+				std::this_thread::sleep_for(std::chrono::milliseconds((1000 * this->velocidad) + 100 * ciudad->obtenerCorriente()));
 			}
 		//ESTE
 		} else if (coordenadas[i][0] == 2) {
@@ -40,7 +40,7 @@ void Acuatico::avanzar(vector<int*> coordenadas, Mapa* ciudad){
 				newX++;
 				if (!this->puedeSeguir(newX, newY, ciudad))
 					return;
-				std::this_thread::sleep_for(std::chrono::milliseconds((1000 / this->velocidad) + 100 * ciudad->obtenerCorriente()));
+				std::this_thread::sleep_for(std::chrono::milliseconds((1000 * this->velocidad) + 100 * ciudad->obtenerCorriente()));
 			}
 		//OESTE	
 		} else if (coordenadas[i][0] == 3) {
@@ -48,7 +48,7 @@ void Acuatico::avanzar(vector<int*> coordenadas, Mapa* ciudad){
 				newX--;
 				if (!this->puedeSeguir(newX, newY, ciudad))
 					return;
-				std::this_thread::sleep_for(std::chrono::milliseconds((1000 / this->velocidad) + 100 * ciudad->obtenerCorriente()));
+				std::this_thread::sleep_for(std::chrono::milliseconds((1000 * this->velocidad) + 100 * ciudad->obtenerCorriente()));
 			}
 		}
 	}

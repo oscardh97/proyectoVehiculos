@@ -4,7 +4,7 @@
 #include "mapa.h"
 class Acuatico : public Vehiculo{
 public:
-	Acuatico(int, int, char, int, int);
+	Acuatico(int, int, char, int, int, int);
 	// ~vehiculo();/*/
 	// int Norte, Sur, Este, Oeste, a, b;
 	// bool estaVolando,estado, moverAvion;

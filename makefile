@@ -14,4 +14,4 @@ acuatico.o:	acuatico.cpp vehiculo.h acuatico.h
 	g++ -c -std=c++11 acuatico.cpp
 
 mapa.o:	mapa.cpp mapa.h vehiculo.h
-	g++ -c mapa.cpp
+	g++ -c -std=c++11 mapa.cpp

@@ -4,11 +4,13 @@ class Vehiculo{
 	// int posX, posY, color;
 	// string nombre, mensajeExplotar;
 	char id, capa,capaEspecial;
+	int color;
 protected:
 	int estado, resistencia, velocidad;
+	bool chocado;
 	Mapa* mapa;
 public:
-	Vehiculo(int, int, char, int, int);
+	Vehiculo(int, int, char, int, int, int);
 	// ~Vehiculo();
 	// Vehiculo();
 	// int Norte, Sur, Este, Oeste, a, b;
@@ -20,7 +22,11 @@ public:
 	// virtual void comprobarAvanzar();
 	// virtual void comprobarRetroceso();
 	void explotar();
-	bool estaVivo();
+	int estaVivo();
+	int obtenerColor();
+	int obtenerResistencia();
+	int obtenerVelocidad();
+	bool estaChocado();
 	virtual bool puedeSeguir(const int,const int, Mapa*) = 0;
 	char obtenerId();
 	// virtual void toString(char**) const = 0;

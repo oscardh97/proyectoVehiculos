@@ -14,11 +14,12 @@
 #include <atomic>
 using namespace std;
 // void imprimirMapa(Mapa*);
-void imprimirMenu();
+int imprimirMenu(int);
 void iniciarColores();
 int pedirDatos(char* , bool);
-void imprimirMensaje(char mensaje[]);
+void imprimirMensaje(char[]);
 vector<int*> pedirCoordenadas();
+void imprimirInfoVehiculo(Vehiculo*, Mapa*);
 int main(int argc, char const *argv[]){
 	/* code */
 	initscr();
@@ -31,26 +32,36 @@ int main(int argc, char const *argv[]){
 	Mapa* ciudad = new Mapa(corrienteAgua);
 	vector <int*> coordenadas;
 	vector <thread*> hilos;
-	//
-		// imprimirMapa(ciudad);
-	imprimirMenu();
-	strcpy(mensaje, "Ingrese una opcion del menu");
-	imprimirMensaje(mensaje);
-	ciudad->imprimirMapa();
+	// ciudad->imprimirMapa();
+	thread actualizador(&Mapa::imprimirMapa, ref(ciudad));
 	while (true){
-		// imprimirMapa(ciudad);
-		int opcionMenu = pedirDatos(input, true);
-		imprimirMenu();
 		strcpy(mensaje, "Ingrese una opcion del menu");
 		imprimirMensaje(mensaje);
+		int opcionMenu = imprimirMenu(0);
 		if (opcionMenu == 1) {
-			strcpy(mensaje, "Ingrese la posicion en x");
+			strcpy(mensaje, "Ingrese el tipo de vehiculo");
 			imprimirMensaje(mensaje);
-			int posX = pedirDatos(input, true);
-			strcpy(mensaje, "Ingrese la posicion en y");
-			imprimirMensaje(mensaje);
-			int posY = pedirDatos(input, true);
-			strcpy(mensaje, "Ingrese la el id");
+			int opcionTipo = imprimirMenu(1);
+			int posX, posY;
+			do{
+				strcpy(mensaje, "Ingrese la posicion en x");
+				imprimirMensaje(mensaje);
+				posX = pedirDatos(input, true);
+				strcpy(mensaje, "Ingrese la posicion en y");
+				imprimirMensaje(mensaje);
+				posY = pedirDatos(input, true);
+				char casilla = ciudad->obtenerCasilla(posX, posY); 
+				if (opcionTipo == 1 && (casilla == 'C' || casilla == 'P')) {
+					break;
+				} else if (opcionTipo == 2 && (casilla == ' ' || casilla == 'P')){
+					break;
+				} else {
+					strcpy(mensaje, "Casilla no valida");
+					imprimirMensaje(mensaje);
+					getch();
+				}
+			} while(true);
+			strcpy(mensaje, "       Ingrese el id");
 			imprimirMensaje(mensaje);
 			char id = getch();
 			printw("%c", id);
@@ -60,20 +71,57 @@ int main(int argc, char const *argv[]){
 			strcpy(mensaje, "Ingrese la cantidad de cuadros por segundo 1-3");
 			imprimirMensaje(mensaje);
 			int velocidad = pedirDatos(input, true);
-			Acuatico* nuevo = new Acuatico(posX, posY, id, resistencia, velocidad);
+			strcpy(mensaje, "Ingrese el color");
+			imprimirMensaje(mensaje);
+			int color = imprimirMenu(2);
+			Vehiculo* nuevo;
+			if (opcionTipo == 1){
+				nuevo = new Terrestre(posX, posY, id, resistencia, velocidad, color);
+			} else if (opcionTipo == 2) {
+				nuevo = new Acuatico(posX, posY, id, resistencia, velocidad, color);
+			}
 			ciudad->agregarVehiculo(posX, posY, nuevo);
 			coordenadas = pedirCoordenadas();
-			// nuevo->avanzar(coordenadas, ciudad);
 			hilos.push_back( new thread(&Vehiculo::avanzar, ref(nuevo),coordenadas, ciudad));
-			// getch();
-			// run.join();
-			// pedirDatos(input, false);
-
+		} else if(opcionMenu == 2) {
+			strcpy(mensaje, "       Ingrese el id");
+			imprimirMensaje(mensaje);
+			char id = getch();
+			printw("%c", id);
+			Vehiculo* seleccionado = ciudad->obtenerVehiculo(id);
+			if (seleccionado != NULL) {
+				if (seleccionado->estaVivo()){
+					coordenadas = pedirCoordenadas();
+					hilos.push_back( new thread(&Vehiculo::avanzar, ref(seleccionado),coordenadas, ciudad));
+				} else {
+					strcpy(mensaje, "El vehiculo esta destrozado");
+					imprimirMensaje(mensaje);
+					getch();
+				}
+			} else {
+				strcpy(mensaje, "El vehiculo no existe");
+				imprimirMensaje(mensaje);
+				getch();
+			}
+		} else if(opcionMenu == 3) {
+			strcpy(mensaje, "       Ingrese el id");
+			imprimirMensaje(mensaje);
+			char id = getch();
+			printw("%c", id);
+			Vehiculo* seleccionado = ciudad->obtenerVehiculo(id);
+			if (seleccionado != NULL) {
+				imprimirInfoVehiculo(seleccionado, ciudad);
+			} else {
+				strcpy(mensaje, "El vehiculo no existe");
+				imprimirMensaje(mensaje);
+				getch();
+			}
 		}
-		refresh();
+		// refresh();
 	}
 	for (int i = 0; i < hilos.size(); i++)
 		hilos[i]->join();
+	actualizador.join();
 	return 0;
 }
 void iniciarColores() {
@@ -89,12 +137,18 @@ void iniciarColores() {
 	init_pair(5,COLOR_WHITE,208);
 	//AEROPUERTO
 	init_pair(6,COLOR_WHITE,95);
-	//AEROPUERTO
+	//ROSADO
 	init_pair(7,COLOR_WHITE,165);
 	//MUERTO
 	init_pair(8,COLOR_WHITE,COLOR_RED);
+	//AMARILLO
+	init_pair(9,COLOR_BLACK,226);
+	//MORADO
+	init_pair(10,COLOR_WHITE,54);
+	//AZUL
+	init_pair(11,COLOR_WHITE,17);
 }
-void imprimirMenu() {
+int imprimirMenu(int opcion) {
 	/**CUADROS DE EJEMPLOS**/
 	move(33, 25);
 	attrset (COLOR_PAIR(1));
@@ -104,21 +158,68 @@ void imprimirMenu() {
 	printw("-------AGUA-------");
 	move(33, 75);
 	attrset (COLOR_PAIR(2));
-	printw("-------ARBOLES-------");
+	printw("-------ARBOLES-----");
 	move(33, 100);
 	attrset (COLOR_PAIR(5));
-	printw("-------PUENTE-------");
+	printw("-------PUENTE-----");
 	move(33, 125);
 	attrset (COLOR_PAIR(6));
 	printw("----AEROPUERTO----");
 	//FIN CUADROS
 
+	char input[100];
 	//MENU
-	move(35, 5);
-	attrset (COLOR_PAIR(4));
-	printw("-------MENU-------");
-	move(36, 5);
-	printw("1.- Agregar Vehiculo");
+	if (opcion == 0) {
+		move(35, 5);
+		attrset (COLOR_PAIR(4));
+		printw("-------MENU-------");
+		move(36, 5);
+		printw("1.- Agregar Vehiculo    ");
+		move(37, 5);
+		printw("2.- Modificar posicion  ");
+		move(38, 5);
+		printw("3.- Informacion vehiculo");
+		move(39, 5);
+		printw("4.- Informacion mapa    ");
+	} else if (opcion == 1) {
+		move(35, 5);
+		attrset (COLOR_PAIR(4));
+		printw("-------TIPO-------");
+		move(36, 5);
+		printw("1.- Terrestre         ");
+		move(37, 5);
+		printw("2.- Acuatico          ");
+		move(38, 5);
+		printw("3.- Aereo             ");
+	} else if (opcion == 2) {
+		move(35, 5);
+		attrset (COLOR_PAIR(4));
+		printw("-------COLORES-------");
+		attrset (COLOR_PAIR(11));
+		move(36, 5);
+		printw("1.-       AZUL         ");
+		attrset (COLOR_PAIR(9));
+		move(37, 5);
+		printw("2.-     AMARILLO       ");
+		attrset (COLOR_PAIR(10));
+		move(38, 5);
+		printw("3.-      MORADO        ");
+		attrset (COLOR_PAIR(7));
+		move(39, 5);
+		printw("4.-      ROSADO        ");
+
+		int color = pedirDatos(input, true);
+
+		if (color == 1)
+			return 11;
+		else if (color == 2)
+			return 9;
+		else if (color == 3)
+			return 10;
+		else if (color == 4)
+			return 7;
+	}
+	return pedirDatos(input, true);
 }
 void imprimirMensaje(char mensaje[]){
 
@@ -139,7 +240,27 @@ void imprimirMensaje(char mensaje[]){
 	move(41,55);
 	addstr("---------------------------------------------------------------");
 	move(40,80);
-	refresh();
+	// refresh();
+}
+void imprimirInfoVehiculo(Vehiculo* seleccionado, Mapa* ciudad) {
+	if (seleccionado != NULL) {
+		move(35, 140);
+		attrset (COLOR_PAIR(4));
+		printw("------VEHICULO-------");
+		move(36, 140);
+		printw("%s%c","ID = ", seleccionado->obtenerId());
+		move(37, 140);
+		printw("%s%d%s","Estado = ", seleccionado->estaVivo(), "    ");
+		move(38, 140);
+		printw("%s%d%s","Velocidad = ", seleccionado->obtenerVelocidad(), "    ");
+		move(40, 140);
+		printw("%s%d%s","Resistencia = ", seleccionado->obtenerResistencia(), "    ");
+		move(41, 140);
+
+		int* posicion = ciudad->posicionVehiculo(seleccionado->obtenerId());
+		printw("%s%d%s%d%c","Posicion = (", posicion[0], ", ", posicion[1], ')');
+		// printw("4.- Informacion mapa    ");
+	}
 }
 int pedirDatos(char* input, bool esEntero){
 	move(40,80);
@@ -179,13 +300,13 @@ vector<int*> pedirCoordenadas() {
 		strcpy (mensaje, "Ingrese la cantidad de posiciones");
 		imprimirMensaje(mensaje);
 		int cantPos = pedirDatos(input, true);
-		if (direccion == 'N') {
+		if (direccion == 'N' || direccion == 'n') {
 			nuevaCoor[0] = 0;
-		} else if (direccion == 'S') {
+		} else if (direccion == 'S' || direccion == 's') {
 			nuevaCoor[0] = 1;
-		} else if (direccion == 'E') {
+		} else if (direccion == 'E' || direccion == 'e') {
 			nuevaCoor[0] = 2;
-		} else if (direccion == 'O') {
+		} else if (direccion == 'O' || direccion == 'o') {
 			nuevaCoor[0] = 3;
 		}
 		nuevaCoor[1] = cantPos;

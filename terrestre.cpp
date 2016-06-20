@@ -11,7 +11,7 @@
 #include <atomic>
 using namespace std;
 
-Terrestre::Terrestre(int posX, int posY, char id, int resistencia, int velocidad):Vehiculo(posX, posY, id, resistencia, velocidad){
+Terrestre::Terrestre(int posX, int posY, char id, int resistencia, int velocidad, int color):Vehiculo(posX, posY, id, resistencia, velocidad, color){
 	// this->vive = true;-
 }	
 void Terrestre::avanzar(vector<int*> coordenadas, Mapa* ciudad){
@@ -24,7 +24,7 @@ void Terrestre::avanzar(vector<int*> coordenadas, Mapa* ciudad){
 				newY--;
 				if (!this->puedeSeguir(newX, newY, ciudad))
 					return;
-				std::this_thread::sleep_for(std::chrono::milliseconds(1000 / this->velocidad));
+				std::this_thread::sleep_for(std::chrono::milliseconds(1000 * this->velocidad));
 			}
 		//SUR
 		} else if (coordenadas[i][0] == 1) {
@@ -32,7 +32,7 @@ void Terrestre::avanzar(vector<int*> coordenadas, Mapa* ciudad){
 				newY++;
 				if (!this->puedeSeguir(newX, newY, ciudad))
 					return;
-				std::this_thread::sleep_for(std::chrono::milliseconds(1000 / this->velocidad));
+				std::this_thread::sleep_for(std::chrono::milliseconds(1000 * this->velocidad));
 			}
 		//ESTE
 		} else if (coordenadas[i][0] == 2) {
@@ -40,7 +40,7 @@ void Terrestre::avanzar(vector<int*> coordenadas, Mapa* ciudad){
 				newX++;
 				if (!this->puedeSeguir(newX, newY, ciudad))
 					return;
-				std::this_thread::sleep_for(std::chrono::milliseconds(1000 / this->velocidad));
+				std::this_thread::sleep_for(std::chrono::milliseconds(1000 * this->velocidad));
 			}
 		//OESTE	
 		} else if (coordenadas[i][0] == 3) {
@@ -48,7 +48,7 @@ void Terrestre::avanzar(vector<int*> coordenadas, Mapa* ciudad){
 				newX--;
 				if (!this->puedeSeguir(newX, newY, ciudad))
 					return;
-				std::this_thread::sleep_for(std::chrono::milliseconds(1000 / this->velocidad));
+				std::this_thread::sleep_for(std::chrono::milliseconds(1000 * this->velocidad));
 			}
 		}
 	}

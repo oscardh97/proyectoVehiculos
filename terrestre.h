@@ -4,7 +4,7 @@
 #include "mapa.h"
 class Terrestre : public Vehiculo{
 public:
-	Terrestre(int, int, char, int, int);
+	Terrestre(int, int, char, int, int, int);
 	// ~vehiculo();/*/
 	// int Norte, Sur, Este, Oeste, a, b;
 	// bool estaVolando,estado, moverAvion;
