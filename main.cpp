@@ -6,6 +6,7 @@
 #include "vehiculo.h"
 #include "terrestre.h"
 #include "acuatico.h"
+#include "rescatista.h"
 #include "mapa.h"
 #include <thread>
 #include <utility>
@@ -13,6 +14,9 @@
 #include <functional>
 #include <atomic>
 #include <stdio.h>
+#include <typeinfo>
+#include <iostream>
+#include <fstream>
 using namespace std;
 void imprimirMapa(Mapa*);
 int imprimirMenu(int);
@@ -20,6 +24,8 @@ void iniciarColores();
 int pedirDatos(char* , bool);
 void imprimirMensaje(char[], bool = false);
 vector<int*> pedirCoordenadas();
+void guardarPartida(Mapa*);
+void cargarPartida(Mapa*, vector <thread*>&);
 void imprimirInfoVehiculo(Vehiculo*, Mapa*);
 void imprimirInfoMapa(Mapa*);
 int main(int argc, char const *argv[]){
@@ -31,10 +37,11 @@ int main(int argc, char const *argv[]){
 	Mapa* ciudad = new Mapa(5);
 	vector <int*> coordenadas;
 	vector <thread*> hilos;
-	char mensaje[] = "Bienvenido presione una tecla para continuar";
+	char mensaje[] = "Bienvenido, desea cargar la partida? S/N";
 	char input[100];
 	imprimirMensaje(mensaje);
 	refresh();
+	cargarPartida(ciudad, hilos);
 	// thread actualizador(&Mapa::imprimirMapa, ref(ciudad));
 	thread actualizador(imprimirMapa, ciudad);
 	// ciudad->imprimirMapa();
@@ -67,6 +74,8 @@ int main(int argc, char const *argv[]){
 					break;
 				} else if (opcionTipo == 2 && (casilla == ' ' || casilla == 'P')){
 					break;
+				} else if (opcionTipo == 3){
+					break;
 				} else {
 					strcpy(mensaje, "Casilla no valida");
 					imprimirMensaje(mensaje, true);
@@ -77,20 +86,24 @@ int main(int argc, char const *argv[]){
 			imprimirMensaje(mensaje);
 			char id = getch();
 			printw("%c", id);
-			strcpy(mensaje, "Ingrese la resistencia 1 - 100");
-			imprimirMensaje(mensaje);
-			int resistencia = pedirDatos(input, true);
-			strcpy(mensaje, "Ingrese la cantidad de cuadros por segundo 1-3");
-			imprimirMensaje(mensaje);
-			int velocidad = pedirDatos(input, true);
-			strcpy(mensaje, "Ingrese el color");
-			imprimirMensaje(mensaje);
-			int color = imprimirMenu(2);
 			Vehiculo* nuevo;
-			if (opcionTipo == 1){
-				nuevo = new Terrestre(posX, posY, id, resistencia, velocidad, color);
-			} else if (opcionTipo == 2) {
-				nuevo = new Acuatico(posX, posY, id, resistencia, velocidad, color);
+			if (opcionTipo != 3) {
+				strcpy(mensaje, "Ingrese la resistencia 1 - 100");
+				imprimirMensaje(mensaje);
+				int resistencia = pedirDatos(input, true);
+				strcpy(mensaje, "Ingrese la cantidad de cuadros por segundo 1-3");
+				imprimirMensaje(mensaje);
+				int velocidad = pedirDatos(input, true);
+				strcpy(mensaje, "Ingrese el color");
+				imprimirMensaje(mensaje);
+				int color = imprimirMenu(2);
+				if (opcionTipo == 1){
+					nuevo = new Terrestre(posX, posY, id, resistencia, velocidad, color);
+				} else if (opcionTipo == 2) {
+					nuevo = new Acuatico(posX, posY, id, resistencia, velocidad, color);
+				} 
+			} else {
+				nuevo = new Rescatista(posX, posY, id);
 			}
 			ciudad->agregarVehiculo(posX, posY, nuevo);
 			coordenadas = pedirCoordenadas();
@@ -130,6 +143,8 @@ int main(int argc, char const *argv[]){
 			}
 		} else if(opcionMenu == 4) {
 			imprimirInfoMapa(ciudad);
+		} else if(opcionMenu == 5) {
+			guardarPartida(ciudad);
 		} else if(opcionMenu == 6) {
 			break;
 		} else { 
@@ -169,6 +184,8 @@ void iniciarColores() {
 	init_pair(10,COLOR_WHITE,54);
 	//AZUL
 	init_pair(11,COLOR_WHITE,17);
+	//GRUA
+	init_pair(12,COLOR_WHITE,236);
 }
 int imprimirMenu(int opcion) {
 	/**CUADROS DE EJEMPLOS**/
@@ -186,7 +203,7 @@ int imprimirMenu(int opcion) {
 	printw("-------PUENTE-----");
 	move(33, 125);
 	attrset (COLOR_PAIR(6));
-	printw("----AEROPUERTO----");
+	printw("------TALLER------");
 	//FIN CUADROS
 
 	char input[100];
@@ -216,7 +233,7 @@ int imprimirMenu(int opcion) {
 		move(37, 5);
 		printw("2.- Acuatico          ");
 		move(38, 5);
-		printw("3.- Aereo              ");
+		printw("3.- Rescatista        ");
 	} else if (opcion == 2) {
 		move(35, 5);
 		attrset (COLOR_PAIR(4));
@@ -422,5 +439,53 @@ void imprimirMapa(Mapa* ciudad) {
 		move(40,80);
 		refresh();
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	}
+}
+void guardarPartida(Mapa* ciudad) {
+	ofstream archivoSalida;
+	archivoSalida.open("partida.txt");
+	archivoSalida << ciudad->toString();
+	archivoSalida.close();
+}
+void cargarPartida(Mapa* ciudad, vector <thread*> &hilos) {
+	ifstream archivoEntrada;
+	string texto;
+	if(ifstream("partida.txt")){
+		archivoEntrada.open("partida.txt");
+		archivoEntrada >> texto;
+		int totalVehiculos = 0;
+		int contCaracters = 0;
+		while (contCaracters + 4 < texto.size()) {
+			char tipo = texto.at(contCaracters);
+			char id = texto.at(contCaracters + 2);
+			int posicionActual = contCaracters + 4;
+			int* atributos = new int[5];
+			for (int i = 0; i < 5; i++) {
+				int cont = 0;
+				while (cont + posicionActual < texto.size() && texto.at(cont + posicionActual) != ',' && texto.at(cont + posicionActual) != ';') {
+					cont++;
+				}
+				atributos[i] = atoi(texto.substr(posicionActual, cont).c_str());
+				posicionActual += cont + 1;
+			}
+			vector <int*> coordenadas;
+			int* coordenadaVacia = new int[2];
+			coordenadaVacia[0] = 0;
+			coordenadaVacia[1] = 0;
+			coordenadas.push_back(coordenadaVacia);
+			Vehiculo* nuevo;
+			if (tipo == 'T'){
+				nuevo = new Terrestre(atributos[3], atributos[4], id, atributos[0], atributos[1], atributos[2]);
+			} else if (tipo == 'A'){
+				nuevo = new Acuatico(atributos[3], atributos[4], id, atributos[0], atributos[1], atributos[2]);
+			} else {
+				nuevo = new Rescatista(atributos[3], atributos[4], id, atributos[0], atributos[1], atributos[2]);
+			}
+
+			ciudad->agregarVehiculo(atributos[3], atributos[4], nuevo);
+
+			hilos.push_back( new thread(&Vehiculo::avanzar, ref(nuevo),coordenadas, ciudad));
+			contCaracters += posicionActual;
+		}
 	}
 }

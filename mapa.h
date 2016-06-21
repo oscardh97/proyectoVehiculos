@@ -1,6 +1,8 @@
 #pragma once
 // #include "vehiculo.h"
 #include <vector>
+#include <string>
+#include <sstream>
 using namespace std;
 class Vehiculo;
 class Mapa{
@@ -24,4 +26,6 @@ class Mapa{
 		int obtenerColumnas();
 		int obtenerCorriente();
 		int* obtenerTotales();
+		int* obtenerParqueo();
+		string toString();
 };

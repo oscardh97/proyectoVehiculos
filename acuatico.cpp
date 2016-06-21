@@ -10,6 +10,8 @@
 #include <chrono>
 #include <functional>
 #include <atomic>
+#include <string>
+#include <sstream>
 using namespace std;
 
 Acuatico::Acuatico(int posX, int posY, char id, int resistencia, int velocidad, int color):Vehiculo(posX, posY, id, resistencia, velocidad, color){
@@ -86,4 +88,10 @@ bool Acuatico::puedeSeguir(const int newX,const int newY, Mapa* ciudad){
 	}
 	ciudad->modificarCasilla(newX, newY, this->obtenerId());
 	return true;
+}
+
+string Acuatico::toString() {
+	stringstream ss;
+	ss << "A," << Vehiculo::toString();
+	return ss.str();
 }

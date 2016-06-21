@@ -1,5 +1,7 @@
 #pragma once
 #include "mapa.h"
+#include <string>
+#include <sstream>
 class Vehiculo{
 	// int posX, posY, color;
 	// string nombre, mensajeExplotar;
@@ -22,6 +24,7 @@ public:
 	// virtual void comprobarAvanzar();
 	// virtual void comprobarRetroceso();
 	void explotar();
+	void reparar();
 	int estaVivo();
 	int obtenerColor();
 	int obtenerResistencia();
@@ -29,5 +32,5 @@ public:
 	bool estaChocado();
 	virtual bool puedeSeguir(const int,const int, Mapa*) = 0;
 	char obtenerId();
-	// virtual void toString(char**) const = 0;
+	virtual string toString();
 };

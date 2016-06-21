@@ -1,5 +1,5 @@
-main: main.o mapa.o vehiculo.o terrestre.o acuatico.o
-	g++  main.o vehiculo.o terrestre.o acuatico.o mapa.o -pthread -lncurses -o proyecto
+main: main.o mapa.o vehiculo.o terrestre.o acuatico.o rescatista.o
+	g++  main.o vehiculo.o terrestre.o acuatico.o rescatista.o mapa.o -pthread -lncurses -o proyecto
 	
 main.o:	main.cpp mapa.o vehiculo.h
 	g++ -c -std=c++11 main.cpp
@@ -12,6 +12,9 @@ terrestre.o:	terrestre.cpp vehiculo.h terrestre.h
 
 acuatico.o:	acuatico.cpp vehiculo.h acuatico.h
 	g++ -c -std=c++11 acuatico.cpp
+
+rescatista.o:	rescatista.cpp vehiculo.h rescatista.h
+	g++ -c -std=c++11 rescatista.cpp
 
 mapa.o:	mapa.cpp mapa.h vehiculo.h
 	g++ -c -std=c++11 mapa.cpp

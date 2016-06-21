@@ -5,7 +5,8 @@
 #include <cstddef>
 #include <vector>
 #include <ncurses.h>
-using namespace std;
+#include <string>
+#include <sstream>
 using namespace std;
 Mapa::Mapa(int corrienteAgua):corrienteAgua(corrienteAgua){
 	this->iniciarMapa();
@@ -87,6 +88,18 @@ void Mapa::iniciarMapa() {
 		}
 }
 
+int* Mapa::obtenerParqueo() {
+
+	for (int FILAS = 0; FILAS < this->filas; FILAS++)
+		for (int COLUMNAS = 0; COLUMNAS < this->columnas; COLUMNAS++){
+			if (this->mapaCaracteres[FILAS][COLUMNAS] == '|') {
+				int* coordenadas = new int[2];
+				coordenadas[0] = COLUMNAS;
+				coordenadas[1] = FILAS;
+				return coordenadas;
+			}
+		}
+}
 int* Mapa::obtenerTotales() {
 	int* totales = new int[4];
 	//TOTAL VEHICULOS
@@ -108,4 +121,14 @@ int* Mapa::obtenerTotales() {
 		}
 	}
 	return totales;
+}
+
+
+string Mapa::toString() {
+	stringstream ss;
+	for (int i = 0; i < vehiculos.size(); i++){
+		int* posicion = posicionVehiculo(vehiculos[i]->obtenerId());
+		ss << vehiculos[i]->toString() << "," << posicion[0] << "," << posicion[1] << ";";
+	}
+	return ss.str();
 }

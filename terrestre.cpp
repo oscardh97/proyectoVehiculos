@@ -9,6 +9,8 @@
 #include <chrono>
 #include <functional>
 #include <atomic>
+#include <string>
+#include <sstream>
 using namespace std;
 
 Terrestre::Terrestre(int posX, int posY, char id, int resistencia, int velocidad, int color):Vehiculo(posX, posY, id, resistencia, velocidad, color){
@@ -56,7 +58,7 @@ void Terrestre::avanzar(vector<int*> coordenadas, Mapa* ciudad){
 
 bool Terrestre::puedeSeguir(const int newX,const int newY, Mapa* ciudad){
 	char nuevaCasilla = ciudad->obtenerCasilla(newX, newY);
-	if (nuevaCasilla != 'C' && nuevaCasilla != 'P') {
+	if (nuevaCasilla != 'C' && nuevaCasilla != 'P' && nuevaCasilla != '|') {
 		if (ciudad->obtenerVehiculo(nuevaCasilla) != NULL){
 			this->chocar(ciudad->obtenerVehiculo(nuevaCasilla));
 		} else {
@@ -69,4 +71,10 @@ bool Terrestre::puedeSeguir(const int newX,const int newY, Mapa* ciudad){
 	}
 	ciudad->modificarCasilla(newX, newY, this->obtenerId());
 	return true;
+}
+
+string Terrestre::toString() {
+	stringstream ss;
+	ss << "T," << Vehiculo::toString();
+	return ss.str();
 }
