@@ -20,7 +20,7 @@ void Terrestre::avanzar(vector<int*> coordenadas, Mapa* ciudad){
 		int newX = posicion[0], newY = posicion[1];
 		//NORTE
 		if (coordenadas[i][0] == 0) {
-			for (int k = coordenadas[i][1]; k >= 0 ; k--) {
+			for (int k = coordenadas[i][1]; k > 0 ; k--) {
 				newY--;
 				if (!this->puedeSeguir(newX, newY, ciudad))
 					return;
@@ -44,7 +44,7 @@ void Terrestre::avanzar(vector<int*> coordenadas, Mapa* ciudad){
 			}
 		//OESTE	
 		} else if (coordenadas[i][0] == 3) {
-			for (int k = coordenadas[i][1]; k >= 0 ; k--) {
+			for (int k = coordenadas[i][1]; k > 0 ; k--) {
 				newX--;
 				if (!this->puedeSeguir(newX, newY, ciudad))
 					return;
@@ -56,15 +56,17 @@ void Terrestre::avanzar(vector<int*> coordenadas, Mapa* ciudad){
 
 bool Terrestre::puedeSeguir(const int newX,const int newY, Mapa* ciudad){
 	char nuevaCasilla = ciudad->obtenerCasilla(newX, newY);
-	ciudad->modificarCasilla(newX, newY, this->obtenerId());
 	if (nuevaCasilla != 'C' && nuevaCasilla != 'P') {
 		if (ciudad->obtenerVehiculo(nuevaCasilla) != NULL){
 			this->chocar(ciudad->obtenerVehiculo(nuevaCasilla));
 		} else {
 			this->explotar();
 		}
-		ciudad->imprimirMapa();
+		if (nuevaCasilla == ' ')
+			ciudad->modificarCasilla(newX, newY, this->obtenerId());
+		// ciudad->imprimirMapa();
 		return false;
 	}
+	ciudad->modificarCasilla(newX, newY, this->obtenerId());
 	return true;
 }

@@ -5,11 +5,6 @@
 #include <cstddef>
 #include <vector>
 #include <ncurses.h>
-#include <thread>
-#include <utility>
-#include <chrono>
-#include <functional>
-#include <atomic>
 using namespace std;
 using namespace std;
 Mapa::Mapa(int corrienteAgua):corrienteAgua(corrienteAgua){
@@ -92,74 +87,25 @@ void Mapa::iniciarMapa() {
 		}
 }
 
-void Mapa::imprimirMapa() {
-	//CALLE
-	// init_pair(1,COLOR_BLACK	,246);
-	// //ARBOLES
-	// init_pair(2,COLOR_WHITE,COLOR_GREEN);
-	// //AGUA
-	// init_pair(3,COLOR_WHITE,COLOR_BLUE);
-	// //MENU
-	// init_pair(4,COLOR_WHITE,COLOR_BLACK);
-	// //PUENTE
-	// init_pair(5,COLOR_WHITE,208);
-	// //AEROPUERTO
-	// init_pair(6,COLOR_WHITE,95);
-	// //AEROPUERTO
-	// init_pair(7,COLOR_WHITE,165);
-	while(true){
-		for (int FILAS = 0; FILAS < this->obtenerFilas() - 1; FILAS++) {
-			attrset (COLOR_PAIR(4));
-			move(FILAS * 2 + 2, 3);
-			printw("%d", FILAS);
-			move(FILAS * 2 + 2, 155);
-			printw("%d", FILAS );
-			for (int COLUMNAS = 0; COLUMNAS < this->obtenerColumnas() - 1; COLUMNAS++) {
-				if (FILAS == 0) {
-					attrset (COLOR_PAIR(4));
-					move(1, COLUMNAS * 5 + 6);
-					printw("%d",COLUMNAS);
-					move(FILAS + 30, COLUMNAS * 5 + 6);
-					printw("%d",COLUMNAS);
-				}
-				move(FILAS * 2 + 2, COLUMNAS * 5 + 5);
-				char casilla = this->obtenerCasilla(COLUMNAS, FILAS);
-				if (casilla == 'C') {
-					attrset (COLOR_PAIR(1));
-				} else if (casilla == '-') {
-					attrset (COLOR_PAIR(2));
-				} else if (casilla == ' ') {
-					attrset (COLOR_PAIR(3));
-				} else if (casilla == 'P') {
-					attrset (COLOR_PAIR(5));
-				} else if (casilla == '|') {
-					attrset (COLOR_PAIR(6));
-				} else {
-					Vehiculo* actual = this->obtenerVehiculo(casilla);
-					if (casilla != NULL){
-						if (!actual->estaChocado()){
-							attrset (COLOR_PAIR(actual->obtenerColor()));
-							printw("____ ");
-							move(FILAS * 2 + 3, COLUMNAS * 5 + 5);
-							printw("%s%c%s", "| ", actual->obtenerId()," \\");
-						} else {
-							attrset (COLOR_PAIR(8));
-							printw(" \\ / ");
-							move(FILAS * 2 + 3, COLUMNAS * 5 + 5);
-							printw(" / \\ ");
-						}
-						continue;
-					}
-
-				}
-				printw("    |");
-				move(FILAS * 2 + 3, COLUMNAS * 5 + 5);
-				printw("____|");
-
-			}
+int* Mapa::obtenerTotales() {
+	int* totales = new int[4];
+	//TOTAL VEHICULOS
+	totales[0] = this->vehiculos.size();
+	//TOTAL VIVOS
+	totales[1] = 0;
+	//TOTAL CHOCADOS
+	totales[2] = 0;
+	//TOTAL MUERTOS
+	totales[3] = 0;
+	for (int i = 0; i < this->vehiculos.size(); i++) {
+		if (this->vehiculos[i]->estaVivo()) {
+			totales[1]++;
+		} else {
+			totales[3]++;
 		}
-		move(40,80);
-		refresh();
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		if (this->vehiculos[i]->estaChocado()) {
+			totales[2]++;
+		}
 	}
+	return totales;
 }

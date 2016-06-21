@@ -22,14 +22,21 @@ void Acuatico::avanzar(vector<int*> coordenadas, Mapa* ciudad){
 		if (coordenadas[i][0] == 0) {
 			for (int k = coordenadas[i][1]; k >= 0 ; k--) {
 				newY--;
-				if (!this->puedeSeguir(newX, newY, ciudad))
+				if (newY == -1){
+					newY = ciudad->obtenerFilas() - 2;
+				}
+				if (!this->puedeSeguir(newX, newY, ciudad)){
 					return;
+				}
 				std::this_thread::sleep_for(std::chrono::milliseconds((1000 * this->velocidad) + 100 * ciudad->obtenerCorriente()));
 			}
 		//SUR
 		} else if (coordenadas[i][0] == 1) {
 			for (int k = 0; k < coordenadas[i][1] ; k++) {
 				newY++;
+				if (newY == ciudad->obtenerFilas() - 1){
+					newY =  0;
+				}
 				if (!this->puedeSeguir(newX, newY, ciudad))
 					return;
 				std::this_thread::sleep_for(std::chrono::milliseconds((1000 * this->velocidad) + 100 * ciudad->obtenerCorriente()));
@@ -38,6 +45,9 @@ void Acuatico::avanzar(vector<int*> coordenadas, Mapa* ciudad){
 		} else if (coordenadas[i][0] == 2) {
 			for (int k = 0; k < coordenadas[i][1] ; k++) {
 				newX++;
+				if (newX == ciudad->obtenerColumnas() - 1){
+					newX =  0;
+				}
 				if (!this->puedeSeguir(newX, newY, ciudad))
 					return;
 				std::this_thread::sleep_for(std::chrono::milliseconds((1000 * this->velocidad) + 100 * ciudad->obtenerCorriente()));
@@ -46,6 +56,9 @@ void Acuatico::avanzar(vector<int*> coordenadas, Mapa* ciudad){
 		} else if (coordenadas[i][0] == 3) {
 			for (int k = coordenadas[i][1]; k >= 0 ; k--) {
 				newX--;
+				if (newX == -1){
+					newX = ciudad->obtenerColumnas() - 2;
+				}
 				if (!this->puedeSeguir(newX, newY, ciudad))
 					return;
 				std::this_thread::sleep_for(std::chrono::milliseconds((1000 * this->velocidad) + 100 * ciudad->obtenerCorriente()));
@@ -57,7 +70,6 @@ void Acuatico::avanzar(vector<int*> coordenadas, Mapa* ciudad){
 bool Acuatico::puedeSeguir(const int newX,const int newY, Mapa* ciudad){
 	char nuevaCasilla = ciudad->obtenerCasilla(newX, newY);
 	char casillaOriginal = ciudad->obtenerCasilla(newX, newY);
-	ciudad->modificarCasilla(newX, newY, this->obtenerId());
 	if (nuevaCasilla != ' ' && nuevaCasilla != 'P') {
 		Vehiculo* otroVehiculo = ciudad->obtenerVehiculo(nuevaCasilla);
 		if (otroVehiculo != NULL) {
@@ -69,8 +81,9 @@ bool Acuatico::puedeSeguir(const int newX,const int newY, Mapa* ciudad){
 		} else {
 			this->explotar();
 		}
-		ciudad->imprimirMapa();
+		// ciudad->imprimirMapa();
 		return false;
 	}
+	ciudad->modificarCasilla(newX, newY, this->obtenerId());
 	return true;
 }

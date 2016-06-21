@@ -12,28 +12,33 @@
 #include <chrono>
 #include <functional>
 #include <atomic>
+#include <stdio.h>
 using namespace std;
-// void imprimirMapa(Mapa*);
+void imprimirMapa(Mapa*);
 int imprimirMenu(int);
 void iniciarColores();
 int pedirDatos(char* , bool);
-void imprimirMensaje(char[]);
+void imprimirMensaje(char[], bool = false);
 vector<int*> pedirCoordenadas();
 void imprimirInfoVehiculo(Vehiculo*, Mapa*);
+void imprimirInfoMapa(Mapa*);
 int main(int argc, char const *argv[]){
 	/* code */
 	initscr();
 	start_color();
 	iniciarColores();
-	char mensaje[] = "Ingrese la corriente del agua";
-	char input[100];
-	imprimirMensaje(mensaje);
-	int corrienteAgua = pedirDatos(input, true);
-	Mapa* ciudad = new Mapa(corrienteAgua);
+	// int corrienteAgua = pedirDatos(input, true);
+	Mapa* ciudad = new Mapa(5);
 	vector <int*> coordenadas;
 	vector <thread*> hilos;
+	char mensaje[] = "Bienvenido presione una tecla para continuar";
+	char input[100];
+	imprimirMensaje(mensaje);
+	refresh();
+	// thread actualizador(&Mapa::imprimirMapa, ref(ciudad));
+	thread actualizador(imprimirMapa, ciudad);
 	// ciudad->imprimirMapa();
-	thread actualizador(&Mapa::imprimirMapa, ref(ciudad));
+	getch();
 	while (true){
 		strcpy(mensaje, "Ingrese una opcion del menu");
 		imprimirMensaje(mensaje);
@@ -51,13 +56,20 @@ int main(int argc, char const *argv[]){
 				imprimirMensaje(mensaje);
 				posY = pedirDatos(input, true);
 				char casilla = ciudad->obtenerCasilla(posX, posY); 
+				if (posX < 0 || posX > ciudad->obtenerColumnas() - 2 || posY < 0 || posY > ciudad->obtenerFilas() - 2){
+					strcpy(mensaje, "Casilla no valida");
+					imprimirMensaje(mensaje, true);
+					getch();
+					continue;
+				}
+
 				if (opcionTipo == 1 && (casilla == 'C' || casilla == 'P')) {
 					break;
 				} else if (opcionTipo == 2 && (casilla == ' ' || casilla == 'P')){
 					break;
 				} else {
 					strcpy(mensaje, "Casilla no valida");
-					imprimirMensaje(mensaje);
+					imprimirMensaje(mensaje, true);
 					getch();
 				}
 			} while(true);
@@ -100,7 +112,7 @@ int main(int argc, char const *argv[]){
 				}
 			} else {
 				strcpy(mensaje, "El vehiculo no existe");
-				imprimirMensaje(mensaje);
+				imprimirMensaje(mensaje, true);
 				getch();
 			}
 		} else if(opcionMenu == 3) {
@@ -113,15 +125,25 @@ int main(int argc, char const *argv[]){
 				imprimirInfoVehiculo(seleccionado, ciudad);
 			} else {
 				strcpy(mensaje, "El vehiculo no existe");
-				imprimirMensaje(mensaje);
+				imprimirMensaje(mensaje, true);
 				getch();
 			}
+		} else if(opcionMenu == 4) {
+			imprimirInfoMapa(ciudad);
+		} else if(opcionMenu == 6) {
+			break;
+		} else { 
+			strcpy(mensaje, "Opcion invalida");
+			imprimirMensaje(mensaje, true);
+			getch();
 		}
 		// refresh();
 	}
 	for (int i = 0; i < hilos.size(); i++)
-		hilos[i]->join();
-	actualizador.join();
+		hilos[i]->detach();
+	actualizador.detach();
+    endwin();
+    exit(1);
 	return 0;
 }
 void iniciarColores() {
@@ -181,6 +203,10 @@ int imprimirMenu(int opcion) {
 		printw("3.- Informacion vehiculo");
 		move(39, 5);
 		printw("4.- Informacion mapa    ");
+		move(40, 5);
+		printw("5.- Guardar             ");
+		move(41, 5);
+		printw("6.- Salir    ");
 	} else if (opcion == 1) {
 		move(35, 5);
 		attrset (COLOR_PAIR(4));
@@ -190,7 +216,7 @@ int imprimirMenu(int opcion) {
 		move(37, 5);
 		printw("2.- Acuatico          ");
 		move(38, 5);
-		printw("3.- Aereo             ");
+		printw("3.- Aereo              ");
 	} else if (opcion == 2) {
 		move(35, 5);
 		attrset (COLOR_PAIR(4));
@@ -203,7 +229,7 @@ int imprimirMenu(int opcion) {
 		printw("2.-     AMARILLO       ");
 		attrset (COLOR_PAIR(10));
 		move(38, 5);
-		printw("3.-      MORADO        ");
+		printw("3.-      MORADO       ");
 		attrset (COLOR_PAIR(7));
 		move(39, 5);
 		printw("4.-      ROSADO        ");
@@ -216,14 +242,14 @@ int imprimirMenu(int opcion) {
 			return 9;
 		else if (color == 3)
 			return 10;
-		else if (color == 4)
+		else
 			return 7;
 	}
 	return pedirDatos(input, true);
 }
-void imprimirMensaje(char mensaje[]){
-
+void imprimirMensaje(char mensaje[], bool esError){
 	attrset (COLOR_PAIR(4));
+
 	move(35,55);
 	addstr("---------------------------------------------------------------");
 	move(37,49);
@@ -234,7 +260,12 @@ void imprimirMensaje(char mensaje[]){
 		printw(" ");
 	}
 	move(37,67);
+	if (esError)
+		attrset (COLOR_PAIR(8));
+	else
+		attrset (COLOR_PAIR(4));
 	addstr(mensaje);
+	attrset (COLOR_PAIR(4));
 	move(39,55);
 	addstr("---------------------------------------------------------------");
 	move(41,55);
@@ -261,6 +292,21 @@ void imprimirInfoVehiculo(Vehiculo* seleccionado, Mapa* ciudad) {
 		printw("%s%d%s%d%c","Posicion = (", posicion[0], ", ", posicion[1], ')');
 		// printw("4.- Informacion mapa    ");
 	}
+}
+void imprimirInfoMapa(Mapa* ciudad) {
+	int* totales = ciudad->obtenerTotales();
+	move(35, 140);
+	attrset (COLOR_PAIR(4));
+	printw("--------CIUDAD-------");
+	move(36, 140);
+	printw("%s%d","VIVOS    = ", totales[1]);
+	move(37, 140);
+	printw("%s%d%s","CHOCADOS = ", totales[2], "    ");
+	move(38, 140);
+	printw("%s%d%s","MUERTOS  = ", totales[3], "    ");
+	move(40, 140);
+	printw("%s%d%s","TOTAL    = ", totales[0], "    ");
+	move(41, 140);
 }
 int pedirDatos(char* input, bool esEntero){
 	move(40,80);
@@ -319,4 +365,62 @@ vector<int*> pedirCoordenadas() {
 		}
 	} while(1);
 	return coordenadas;
+}
+
+void imprimirMapa(Mapa* ciudad) {
+	while(true){
+		for (int FILAS = 0; FILAS < ciudad->obtenerFilas() - 1; FILAS++) {
+			attrset (COLOR_PAIR(4));
+			move(FILAS * 2 + 2, 3);
+			printw("%d", FILAS);
+			move(FILAS * 2 + 2, 155);
+			printw("%d", FILAS );
+			for (int COLUMNAS = 0; COLUMNAS < ciudad->obtenerColumnas() - 1; COLUMNAS++) {
+				if (FILAS == 0) {
+					attrset (COLOR_PAIR(4));
+					move(1, COLUMNAS * 5 + 6);
+					printw("%d",COLUMNAS);
+					move(FILAS + 30, COLUMNAS * 5 + 6);
+					printw("%d",COLUMNAS);
+				}
+				move(FILAS * 2 + 2, COLUMNAS * 5 + 5);
+				char casilla = ciudad->obtenerCasilla(COLUMNAS, FILAS);
+				if (casilla == 'C') {
+					attrset (COLOR_PAIR(1));
+				} else if (casilla == '-') {
+					attrset (COLOR_PAIR(2));
+				} else if (casilla == ' ') {
+					attrset (COLOR_PAIR(3));
+				} else if (casilla == 'P') {
+					attrset (COLOR_PAIR(5));
+				} else if (casilla == '|') {
+					attrset (COLOR_PAIR(6));
+				} else {
+					Vehiculo* actual = ciudad->obtenerVehiculo(casilla);
+					if (casilla != NULL){
+						if (!actual->estaChocado()){
+							attrset (COLOR_PAIR(actual->obtenerColor()));
+							printw("____ ");
+							move(FILAS * 2 + 3, COLUMNAS * 5 + 5);
+							printw("%s%c%s", "| ", actual->obtenerId()," \\");
+						} else {
+							attrset (COLOR_PAIR(8));
+							printw(" \\ / ");
+							move(FILAS * 2 + 3, COLUMNAS * 5 + 5);
+							printw(" / \\ ");
+						}
+						continue;
+					}
+
+				}
+				printw("    |");
+				move(FILAS * 2 + 3, COLUMNAS * 5 + 5);
+				printw("____|");
+
+			}
+		}
+		move(40,80);
+		refresh();
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	}
 }

@@ -23,4 +23,5 @@ class Mapa{
 		void imprimirMapa();
 		int obtenerColumnas();
 		int obtenerCorriente();
+		int* obtenerTotales();
 };

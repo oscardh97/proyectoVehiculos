@@ -17,6 +17,7 @@ char Vehiculo::obtenerId(){
 }
 void Vehiculo::explotar(){
 	this->estado = 0;
+	this->chocado = true;
 }
 int Vehiculo::estaVivo(){
 	return this->estado;
