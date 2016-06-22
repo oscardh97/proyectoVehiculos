@@ -4,7 +4,7 @@
 #include <string>
 #include <sstream>
 // Vehiculo::Vehiculo(){}
-Vehiculo::Vehiculo(int posX, int posY, char id, int resistencia, int velocidad, int color):id(id), resistencia(resistencia), velocidad(velocidad), color(color){
+Vehiculo::Vehiculo(char id, int resistencia, int velocidad, int color):id(id), resistencia(resistencia), velocidad(velocidad), color(color){
 	estado = 100;
 	chocado = false;
 	// estaVolando =false;
@@ -12,7 +12,7 @@ Vehiculo::Vehiculo(int posX, int posY, char id, int resistencia, int velocidad, 
 	// estado = true;
 	// reiniciarDirecion();
 }
-// Vehiculo::~Vehiculo(){}
+Vehiculo::~Vehiculo(){}
 // void Vehiculo::avanzar(){}
 char Vehiculo::obtenerId(){
 	return this->id;
@@ -24,21 +24,29 @@ void Vehiculo::explotar(){
 void Vehiculo::reparar(){
 	this->chocado = false;
 }
+void Vehiculo::setEstado(int newEstado){
+	this->estado = newEstado;
+	// this->chocado = false;
+}
 int Vehiculo::estaVivo(){
 	return this->estado;
 }
 void Vehiculo::chocar(Vehiculo* otroVehiculo) {
 	double impacto = abs(this->resistencia - otroVehiculo->resistencia) / this->velocidad;
-	this->estado -= abs(this->estado - abs(this->resistencia - impacto));
-	otroVehiculo->estado -= abs(otroVehiculo->estado - abs(otroVehiculo->resistencia - impacto));
+
+	if (impacto > this->resistencia) {
+		this->estado = 0;
+	} else { 
+		this->estado -= abs(this->estado - abs(this->resistencia - impacto));
+	}
+
+	if (impacto > otroVehiculo->resistencia) {
+		otroVehiculo->estado = 0;
+	} else {
+		otroVehiculo->estado -= abs(otroVehiculo->estado - abs(otroVehiculo->resistencia - impacto));
+	}
 	this->chocado = true;
 	otroVehiculo->chocado = true;
-	if (this->estado <= 0) {
-		this->explotar();
-	}
-	if (otroVehiculo->estado <= 0) {
-		otroVehiculo->explotar();
-	}
 }
 
 int Vehiculo::obtenerColor() {
@@ -58,6 +66,6 @@ bool Vehiculo::estaChocado(){
 string Vehiculo::toString() {
 	stringstream ss;
 	// int* posicion = ciudad->posicionVehiculo(id);
-	ss << this->id << "," << this->resistencia << "," << this->velocidad << "," << color;
+	ss << this->id << "," << this->resistencia << "," << this->velocidad << "," << color << "," << estado;
 	return ss.str();
 }

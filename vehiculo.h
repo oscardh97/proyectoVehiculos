@@ -3,8 +3,6 @@
 #include <string>
 #include <sstream>
 class Vehiculo{
-	// int posX, posY, color;
-	// string nombre, mensajeExplotar;
 	char id, capa,capaEspecial;
 	int color;
 protected:
@@ -12,22 +10,16 @@ protected:
 	bool chocado;
 	Mapa* mapa;
 public:
-	Vehiculo(int, int, char, int, int, int);
-	// ~Vehiculo();
-	// Vehiculo();
-	// int Norte, Sur, Este, Oeste, a, b;
-	// bool estaVolando,estado, moverAvion;
-	// virtual void accionEnAire(){}
+	Vehiculo(char, int, int, int);
+	~Vehiculo();
 	virtual void avanzar(vector<int*>, Mapa*) = 0;
 	void chocar(Vehiculo*);
-	// void iniciarDireaccion();
-	// virtual void comprobarAvanzar();
-	// virtual void comprobarRetroceso();
 	void explotar();
 	void reparar();
 	int estaVivo();
 	int obtenerColor();
 	int obtenerResistencia();
+	void setEstado(int);
 	int obtenerVelocidad();
 	bool estaChocado();
 	virtual bool puedeSeguir(const int,const int, Mapa*) = 0;

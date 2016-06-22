@@ -6,7 +6,7 @@
 #include <sstream>
 class Acuatico : public Vehiculo{
 public:
-	Acuatico(int, int, char, int, int, int);
+	Acuatico(char, int, int, int);
 	void avanzar(vector<int*>, Mapa*);
 	bool puedeSeguir(const int,const int, Mapa*);
 	string toString();

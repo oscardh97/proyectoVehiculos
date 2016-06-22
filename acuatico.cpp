@@ -14,7 +14,7 @@
 #include <sstream>
 using namespace std;
 
-Acuatico::Acuatico(int posX, int posY, char id, int resistencia, int velocidad, int color):Vehiculo(posX, posY, id, resistencia, velocidad, color){
+Acuatico::Acuatico(char id, int resistencia, int velocidad, int color):Vehiculo(id, resistencia, velocidad, color){
 }
 void Acuatico::avanzar(vector<int*> coordenadas, Mapa* ciudad){
 	for (int i = 0; i < coordenadas.size(); i++) {
@@ -24,46 +24,46 @@ void Acuatico::avanzar(vector<int*> coordenadas, Mapa* ciudad){
 		if (coordenadas[i][0] == 0) {
 			for (int k = coordenadas[i][1]; k >= 0 ; k--) {
 				newY--;
+				std::this_thread::sleep_for(std::chrono::milliseconds(1000 * (this->velocidad + ciudad->obtenerCorriente())));
 				if (newY == -1){
 					newY = ciudad->obtenerFilas() - 2;
 				}
 				if (!this->puedeSeguir(newX, newY, ciudad)){
 					return;
 				}
-				std::this_thread::sleep_for(std::chrono::milliseconds((1000 * this->velocidad) + 100 * ciudad->obtenerCorriente()));
 			}
 		//SUR
 		} else if (coordenadas[i][0] == 1) {
 			for (int k = 0; k < coordenadas[i][1] ; k++) {
 				newY++;
+				std::this_thread::sleep_for(std::chrono::milliseconds(1000 * (this->velocidad + ciudad->obtenerCorriente())));
 				if (newY == ciudad->obtenerFilas() - 1){
 					newY =  0;
 				}
 				if (!this->puedeSeguir(newX, newY, ciudad))
 					return;
-				std::this_thread::sleep_for(std::chrono::milliseconds((1000 * this->velocidad) + 100 * ciudad->obtenerCorriente()));
 			}
 		//ESTE
 		} else if (coordenadas[i][0] == 2) {
 			for (int k = 0; k < coordenadas[i][1] ; k++) {
 				newX++;
+				std::this_thread::sleep_for(std::chrono::milliseconds(1000 * (this->velocidad + ciudad->obtenerCorriente())));
 				if (newX == ciudad->obtenerColumnas() - 1){
 					newX =  0;
 				}
 				if (!this->puedeSeguir(newX, newY, ciudad))
 					return;
-				std::this_thread::sleep_for(std::chrono::milliseconds((1000 * this->velocidad) + 100 * ciudad->obtenerCorriente()));
 			}
 		//OESTE	
 		} else if (coordenadas[i][0] == 3) {
 			for (int k = coordenadas[i][1]; k >= 0 ; k--) {
+				std::this_thread::sleep_for(std::chrono::milliseconds(1000 * (this->velocidad + ciudad->obtenerCorriente())));
 				newX--;
 				if (newX == -1){
 					newX = ciudad->obtenerColumnas() - 2;
 				}
 				if (!this->puedeSeguir(newX, newY, ciudad))
 					return;
-				std::this_thread::sleep_for(std::chrono::milliseconds((1000 * this->velocidad) + 100 * ciudad->obtenerCorriente()));
 			}
 		}
 	}
@@ -83,7 +83,6 @@ bool Acuatico::puedeSeguir(const int newX,const int newY, Mapa* ciudad){
 		} else {
 			this->explotar();
 		}
-		// ciudad->imprimirMapa();
 		return false;
 	}
 	ciudad->modificarCasilla(newX, newY, this->obtenerId());

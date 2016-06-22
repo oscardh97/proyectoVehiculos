@@ -13,7 +13,7 @@
 #include <sstream>
 using namespace std;
 
-Terrestre::Terrestre(int posX, int posY, char id, int resistencia, int velocidad, int color):Vehiculo(posX, posY, id, resistencia, velocidad, color){
+Terrestre::Terrestre(char id, int resistencia, int velocidad, int color):Vehiculo(id, resistencia, velocidad, color){
 	// this->vive = true;-
 }	
 void Terrestre::avanzar(vector<int*> coordenadas, Mapa* ciudad){
@@ -24,33 +24,33 @@ void Terrestre::avanzar(vector<int*> coordenadas, Mapa* ciudad){
 		if (coordenadas[i][0] == 0) {
 			for (int k = coordenadas[i][1]; k > 0 ; k--) {
 				newY--;
+				std::this_thread::sleep_for(std::chrono::milliseconds(1000 * this->velocidad));
 				if (!this->puedeSeguir(newX, newY, ciudad))
 					return;
-				std::this_thread::sleep_for(std::chrono::milliseconds(1000 * this->velocidad));
 			}
 		//SUR
 		} else if (coordenadas[i][0] == 1) {
 			for (int k = 0; k < coordenadas[i][1] ; k++) {
 				newY++;
+				std::this_thread::sleep_for(std::chrono::milliseconds(1000 * this->velocidad));
 				if (!this->puedeSeguir(newX, newY, ciudad))
 					return;
-				std::this_thread::sleep_for(std::chrono::milliseconds(1000 * this->velocidad));
 			}
 		//ESTE
 		} else if (coordenadas[i][0] == 2) {
 			for (int k = 0; k < coordenadas[i][1] ; k++) {
 				newX++;
+				std::this_thread::sleep_for(std::chrono::milliseconds(1000 * this->velocidad));
 				if (!this->puedeSeguir(newX, newY, ciudad))
 					return;
-				std::this_thread::sleep_for(std::chrono::milliseconds(1000 * this->velocidad));
 			}
 		//OESTE	
 		} else if (coordenadas[i][0] == 3) {
 			for (int k = coordenadas[i][1]; k > 0 ; k--) {
 				newX--;
+				std::this_thread::sleep_for(std::chrono::milliseconds(1000 * this->velocidad));
 				if (!this->puedeSeguir(newX, newY, ciudad))
 					return;
-				std::this_thread::sleep_for(std::chrono::milliseconds(1000 * this->velocidad));
 			}
 		}
 	}
@@ -62,7 +62,9 @@ bool Terrestre::puedeSeguir(const int newX,const int newY, Mapa* ciudad){
 		if (ciudad->obtenerVehiculo(nuevaCasilla) != NULL){
 			this->chocar(ciudad->obtenerVehiculo(nuevaCasilla));
 		} else {
+			ciudad->modificarCasilla(newX, newY, this->obtenerId());
 			this->explotar();
+			return false;
 		}
 		if (nuevaCasilla == ' ')
 			ciudad->modificarCasilla(newX, newY, this->obtenerId());

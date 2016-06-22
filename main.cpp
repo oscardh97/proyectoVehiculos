@@ -41,13 +41,16 @@ int main(int argc, char const *argv[]){
 	char input[100];
 	imprimirMensaje(mensaje);
 	refresh();
-	cargarPartida(ciudad, hilos);
 	// thread actualizador(&Mapa::imprimirMapa, ref(ciudad));
 	thread actualizador(imprimirMapa, ciudad);
 	// ciudad->imprimirMapa();
-	getch();
+	// getch();
+	char cargar = getch();
+	if (cargar == 'S' || cargar == 's'){
+		cargarPartida(ciudad, hilos);
+	}
 	while (true){
-		strcpy(mensaje, "Ingrese una opcion del menu");
+		strcpy(mensaje, "     Ingrese una opcion del menu");
 		imprimirMensaje(mensaje);
 		int opcionMenu = imprimirMenu(0);
 		if (opcionMenu == 1) {
@@ -82,28 +85,52 @@ int main(int argc, char const *argv[]){
 					getch();
 				}
 			} while(true);
-			strcpy(mensaje, "       Ingrese el id");
-			imprimirMensaje(mensaje);
-			char id = getch();
-			printw("%c", id);
+			char id;
+			do {
+				strcpy(mensaje, "Ingrese el id *(Distinto a P, |, - y C)");
+				imprimirMensaje(mensaje);
+				id = getch();
+				printw("%c", id);
+				if (id == 'P' || id == 'C' || id == '-' || id == '|' || id == ' '){
+					strcpy(mensaje, "Caracter reservado para el uso del sistema");
+					imprimirMensaje(mensaje, true);
+					getch();
+				} else if (ciudad->obtenerVehiculo(id) == NULL) {
+					break;
+				} else {
+					strcpy(mensaje, "       El vehiculo ya existe        ");
+					imprimirMensaje(mensaje, true);
+					getch();
+				}
+			} while (true);
 			Vehiculo* nuevo;
 			if (opcionTipo != 3) {
 				strcpy(mensaje, "Ingrese la resistencia 1 - 100");
 				imprimirMensaje(mensaje);
 				int resistencia = pedirDatos(input, true);
-				strcpy(mensaje, "Ingrese la cantidad de cuadros por segundo 1-3");
-				imprimirMensaje(mensaje);
-				int velocidad = pedirDatos(input, true);
+				int velocidad;
+				do {
+					strcpy(mensaje, "Ingrese la cantidad de segundos por cuadro 1-3");
+					imprimirMensaje(mensaje);
+					velocidad = pedirDatos(input, true);
+					if (velocidad > 3 || velocidad < 1) {
+						strcpy(mensaje, "       Velocidad invalida       ");
+						imprimirMensaje(mensaje, true);
+						getch();	
+					} else {
+						break;
+					}
+				} while(1);
 				strcpy(mensaje, "Ingrese el color");
 				imprimirMensaje(mensaje);
 				int color = imprimirMenu(2);
 				if (opcionTipo == 1){
-					nuevo = new Terrestre(posX, posY, id, resistencia, velocidad, color);
+					nuevo = new Terrestre(id, resistencia, velocidad, color);
 				} else if (opcionTipo == 2) {
-					nuevo = new Acuatico(posX, posY, id, resistencia, velocidad, color);
+					nuevo = new Acuatico(id, resistencia, velocidad, color);
 				} 
 			} else {
-				nuevo = new Rescatista(posX, posY, id);
+				nuevo = new Rescatista(id);
 			}
 			ciudad->agregarVehiculo(posX, posY, nuevo);
 			coordenadas = pedirCoordenadas();
@@ -144,8 +171,26 @@ int main(int argc, char const *argv[]){
 		} else if(opcionMenu == 4) {
 			imprimirInfoMapa(ciudad);
 		} else if(opcionMenu == 5) {
-			guardarPartida(ciudad);
+
+			do {
+				strcpy(mensaje, "Ingrese la cantidad de segundos por cuadro 0-3");
+				imprimirMensaje(mensaje);
+				int velocidad = pedirDatos(input, true);
+				if (velocidad > 3 || velocidad < 0) {
+					strcpy(mensaje, "       Velocidad invalida       ");
+					imprimirMensaje(mensaje, true);
+					getch();	
+				} else {
+					ciudad->modificarCorriente(velocidad);
+					break;
+				}
+			} while(1);
 		} else if(opcionMenu == 6) {
+			guardarPartida(ciudad);
+			strcpy(mensaje, "       Partida guardada con exito");
+			imprimirMensaje(mensaje);
+			getch();
+		} else if(opcionMenu == 7) {
 			break;
 		} else { 
 			strcpy(mensaje, "Opcion invalida");
@@ -221,9 +266,12 @@ int imprimirMenu(int opcion) {
 		move(39, 5);
 		printw("4.- Informacion mapa    ");
 		move(40, 5);
-		printw("5.- Guardar             ");
+		printw("5.- Modificar corriente ");
 		move(41, 5);
-		printw("6.- Salir    ");
+		printw("6.- Guardar             ");
+		move(42, 5);
+		printw("7.- Salir    ");
+
 	} else if (opcion == 1) {
 		move(35, 5);
 		attrset (COLOR_PAIR(4));
@@ -233,7 +281,15 @@ int imprimirMenu(int opcion) {
 		move(37, 5);
 		printw("2.- Acuatico          ");
 		move(38, 5);
-		printw("3.- Rescatista        ");
+		printw("3.- Rescatista            ");
+		move(39, 5);
+		printw("                      ");
+		move(40, 5);
+		printw("                         ");
+		move(41, 5);
+		printw("                      ");
+		move(42, 5);
+		printw("                      ");
 	} else if (opcion == 2) {
 		move(35, 5);
 		attrset (COLOR_PAIR(4));
@@ -246,12 +302,19 @@ int imprimirMenu(int opcion) {
 		printw("2.-     AMARILLO       ");
 		attrset (COLOR_PAIR(10));
 		move(38, 5);
-		printw("3.-      MORADO       ");
+		printw("3.-      MORADO         ");
 		attrset (COLOR_PAIR(7));
 		move(39, 5);
 		printw("4.-      ROSADO        ");
+		attrset (COLOR_PAIR(4));
+		move(40, 5);
+		printw("                       ");
+		move(41, 5);
+		printw("                       ");
+		move(42, 5);
+		printw("                       ");
 
-		int color = pedirDatos(input, true);
+		int color = getch() - '0';
 
 		if (color == 1)
 			return 11;
@@ -262,7 +325,7 @@ int imprimirMenu(int opcion) {
 		else
 			return 7;
 	}
-	return pedirDatos(input, true);
+	return getch() - '0';
 }
 void imprimirMensaje(char mensaje[], bool esError){
 	attrset (COLOR_PAIR(4));
@@ -296,11 +359,13 @@ void imprimirInfoVehiculo(Vehiculo* seleccionado, Mapa* ciudad) {
 		attrset (COLOR_PAIR(4));
 		printw("------VEHICULO-------");
 		move(36, 140);
-		printw("%s%c","ID = ", seleccionado->obtenerId());
+		printw("%s%c%s","ID = ", seleccionado->obtenerId(), "      ");
 		move(37, 140);
 		printw("%s%d%s","Estado = ", seleccionado->estaVivo(), "    ");
 		move(38, 140);
 		printw("%s%d%s","Velocidad = ", seleccionado->obtenerVelocidad(), "    ");
+		move(39, 140);
+		printw("%s%d%s","Chocado = ", seleccionado->estaChocado(), "    ");
 		move(40, 140);
 		printw("%s%d%s","Resistencia = ", seleccionado->obtenerResistencia(), "    ");
 		move(41, 140);
@@ -321,8 +386,10 @@ void imprimirInfoMapa(Mapa* ciudad) {
 	printw("%s%d%s","CHOCADOS = ", totales[2], "    ");
 	move(38, 140);
 	printw("%s%d%s","MUERTOS  = ", totales[3], "    ");
-	move(40, 140);
+	move(39, 140);
 	printw("%s%d%s","TOTAL    = ", totales[0], "    ");
+	move(40, 140);
+	printw("%s%d%s","CORRIENTE = ", ciudad->obtenerCorriente(), "    ");
 	move(41, 140);
 }
 int pedirDatos(char* input, bool esEntero){
@@ -414,7 +481,7 @@ void imprimirMapa(Mapa* ciudad) {
 					attrset (COLOR_PAIR(6));
 				} else {
 					Vehiculo* actual = ciudad->obtenerVehiculo(casilla);
-					if (casilla != NULL){
+					if (actual != NULL){
 						if (!actual->estaChocado()){
 							attrset (COLOR_PAIR(actual->obtenerColor()));
 							printw("____ ");
@@ -453,14 +520,18 @@ void cargarPartida(Mapa* ciudad, vector <thread*> &hilos) {
 	if(ifstream("partida.txt")){
 		archivoEntrada.open("partida.txt");
 		archivoEntrada >> texto;
-		int totalVehiculos = 0;
-		int contCaracters = 0;
-		while (contCaracters + 4 < texto.size()) {
+		if (texto.size() == 0) {
+			return;
+		}
+		int velocidadCorriente = texto.at(0) - '0';
+		ciudad->modificarCorriente(velocidadCorriente);
+		int contCaracters = 2;
+		while (contCaracters < texto.size() - 1) {
 			char tipo = texto.at(contCaracters);
 			char id = texto.at(contCaracters + 2);
 			int posicionActual = contCaracters + 4;
-			int* atributos = new int[5];
-			for (int i = 0; i < 5; i++) {
+			int* atributos = new int[6];
+			for (int i = 0; i < 6; i++) {
 				int cont = 0;
 				while (cont + posicionActual < texto.size() && texto.at(cont + posicionActual) != ',' && texto.at(cont + posicionActual) != ';') {
 					cont++;
@@ -468,24 +539,29 @@ void cargarPartida(Mapa* ciudad, vector <thread*> &hilos) {
 				atributos[i] = atoi(texto.substr(posicionActual, cont).c_str());
 				posicionActual += cont + 1;
 			}
-			vector <int*> coordenadas;
-			int* coordenadaVacia = new int[2];
-			coordenadaVacia[0] = 0;
-			coordenadaVacia[1] = 0;
-			coordenadas.push_back(coordenadaVacia);
 			Vehiculo* nuevo;
 			if (tipo == 'T'){
-				nuevo = new Terrestre(atributos[3], atributos[4], id, atributos[0], atributos[1], atributos[2]);
+				nuevo = new Terrestre(id, atributos[0], atributos[1], atributos[2]);
 			} else if (tipo == 'A'){
-				nuevo = new Acuatico(atributos[3], atributos[4], id, atributos[0], atributos[1], atributos[2]);
+				nuevo = new Acuatico(id, atributos[0], atributos[1], atributos[2]);
 			} else {
-				nuevo = new Rescatista(atributos[3], atributos[4], id, atributos[0], atributos[1], atributos[2]);
+				nuevo = new Rescatista(id, atributos[0], atributos[1], atributos[2]);
 			}
-
-			ciudad->agregarVehiculo(atributos[3], atributos[4], nuevo);
-
-			hilos.push_back( new thread(&Vehiculo::avanzar, ref(nuevo),coordenadas, ciudad));
-			contCaracters += posicionActual;
+				ciudad->agregarVehiculo(atributos[4], atributos[5], nuevo);
+			if (atributos[4] >= 0 && atributos[4] <= ciudad->obtenerColumnas() - 2 && atributos[5] >= 0 && atributos[5] <= ciudad->obtenerFilas() - 2) {
+				vector <int*> coordenadas;
+				hilos.push_back( new thread(&Vehiculo::avanzar, ref(nuevo),coordenadas, ciudad));
+			} else {
+				nuevo->explotar();	
+				nuevo->setEstado(atributos[3]);
+				if (nuevo->estaVivo()) {
+					int* taller = ciudad->obtenerParqueo();
+					ciudad->modificarCasilla(taller[0], taller[1], nuevo->obtenerId());
+					nuevo->reparar();
+				}
+			}
+			nuevo->setEstado(atributos[3]);
+			contCaracters = posicionActual;
 		}
 	}
 }

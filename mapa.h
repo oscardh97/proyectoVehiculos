@@ -27,5 +27,6 @@ class Mapa{
 		int obtenerCorriente();
 		int* obtenerTotales();
 		int* obtenerParqueo();
+		void modificarCorriente(int);
 		string toString();
 };

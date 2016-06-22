@@ -12,11 +12,14 @@ Mapa::Mapa(int corrienteAgua):corrienteAgua(corrienteAgua){
 	this->iniciarMapa();
 }
 Mapa::~Mapa(){
-	// for (int i = 0; i < this->vehiculos.size(); i++)
-	// 	delete this->vehiculos[i];
+	for (int i = 0; i < this->vehiculos.size(); i++)
+		delete this->vehiculos[i];
 }
 int Mapa::obtenerCorriente() {
 	return this->corrienteAgua;
+}
+void Mapa::modificarCorriente(int nuevaCorriente) {
+	this->corrienteAgua = nuevaCorriente;
 }
 Vehiculo* Mapa::obtenerVehiculo(const char id)const{
 	for (int i = 0; i < this->vehiculos.size(); i++)
@@ -55,7 +58,8 @@ int* Mapa::posicionVehiculo(const char id)const{
 }
 void  Mapa::agregarVehiculo(int x, int y, Vehiculo* nuevoVehiculo){
 	this->vehiculos.push_back(nuevoVehiculo);
-	mapaCaracteres[y][x] = nuevoVehiculo->obtenerId();
+	if (x != -1 && y != -1)
+		mapaCaracteres[y][x] = nuevoVehiculo->obtenerId();
 }
 int Mapa::obtenerFilas(){
 	return this->filas;
@@ -126,6 +130,7 @@ int* Mapa::obtenerTotales() {
 
 string Mapa::toString() {
 	stringstream ss;
+	ss << this->corrienteAgua << ";";
 	for (int i = 0; i < vehiculos.size(); i++){
 		int* posicion = posicionVehiculo(vehiculos[i]->obtenerId());
 		ss << vehiculos[i]->toString() << "," << posicion[0] << "," << posicion[1] << ";";
